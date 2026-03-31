@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Pulse</title>
+    <meta
+      name="description"
+      content="Responsive interactive weather dashboard with live search, hourly trends, weekly forecast, favorites, voice search, and weather map."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-mode="light" data-weather="clear">
+    <div class="app-shell">
+      <header class="topbar glass-card">
+        <div>
+          <p class="eyebrow"> Weather App</p>
+          <h1>AYUSH WORLDZ</h1>
+        </div>
+
+        <form id="searchForm" class="searchbar">
+          <span>🔎</span>
+          <input
+            id="cityInput"
+            name="city"
+            type="text"
+            placeholder="Search any city"
+            autocomplete="off"
+            list="citySuggestions"
+          />
+          <datalist id="citySuggestions"></datalist>
+          <button type="submit">Search</button>
+        </form>
+
+        <div class="topbar-actions">
+          <button id="voiceBtn" class="icon-btn" type="button" title="Voice search">🎙️</button>
+          <button id="locateBtn" class="icon-btn" type="button" title="Use current location">📍</button>
+          <button id="themeBtn" class="icon-btn" type="button" title="Toggle dark mode">🌙</button>
+        </div>
+      </header>
+
+      <section class="favorites-row glass-card">
+        <div>
+          <p class="section-tag">Saved cities</p>
+          <div id="favoritesList" class="favorites-list"></div>
+        </div>
+        <p id="statusText" class="status-text">Loading your weather dashboard...</p>
+      </section>
+
+      <main class="dashboard-grid">
+        <section class="hero-card glass-card">
+          <div class="hero-main">
+            <div>
+              <p class="section-tag">Current weather</p>
+              <h2 id="locationName">Detecting location...</h2>
+              <p id="dateTime">--</p>
+              <div class="weather-inline">
+                <span id="currentIcon" class="weather-emoji">☀️</span>
+                <div>
+                  <p id="conditionText" class="condition-text">Loading...</p>
+                  <p id="feelsLikeText" class="muted">Feels like --°</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="temperature-block">
+              <p id="currentTemp" class="current-temp">--°</p>
+              <button id="saveFavoriteBtn" class="save-btn" type="button">⭐ Save city</button>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <article class="metric-card">
+              <span>💧</span>
+              <div>
+                <p>Humidity</p>
+                <strong id="humidityValue">--%</strong>
+              </div>
+            </article>
+            <article class="metric-card">
+              <span>💨</span>
+              <div>
+                <p>Wind</p>
+                <strong id="windValue">-- km/h</strong>
+              </div>
+            </article>
+            <article class="metric-card">
+              <span>🌡️</span>
+              <div>
+                <p>Min / Max</p>
+                <strong id="minMaxValue">--° / --°</strong>
+              </div>
+            </article>
+            <article class="metric-card">
+              <span>☀️</span>
+              <div>
+                <p>UV Index</p>
+                <strong id="uvValue">--</strong>
+              </div>
+            </article>
+            <article class="metric-card">
+              <span>🌧️</span>
+              <div>
+                <p>Rain chance</p>
+                <strong id="rainChanceValue">--%</strong>
+              </div>
+            </article>
+            <article class="metric-card">
+              <span>📊</span>
+              <div>
+                <p>Trend</p>
+                <strong id="trendValue">--</strong>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="glass-card alert-card">
+          <div class="card-heading">
+            <h3>🔔 Weather alerts</h3>
+            <p>Quick rain / storm heads-up</p>
+          </div>
+          <div id="alertList" class="alert-list"></div>
+        </section>
+
+        <section class="glass-card insight-card">
+          <div class="card-heading">
+            <h3>🤖 Smart forecast insight</h3>
+            <p>Auto-generated prediction summary</p>
+          </div>
+          <p id="insightText" class="insight-text">Preparing your forecast insight...</p>
+        </section>
+
+        <section class="glass-card wide-card">
+          <div class="card-heading">
+            <h3>🕒 Next 24 hours</h3>
+            <p>Scroll through the hourly weather</p>
+          </div>
+          <div id="hourlyForecast" class="hourly-strip"></div>
+        </section>
+
+        <section class="glass-card chart-card">
+          <div class="card-heading">
+            <h3>📈 Temperature trend</h3>
+            <p>Day-to-night temperature flow</p>
+          </div>
+          <canvas id="trendChart" height="220"></canvas>
+        </section>
+
+        <section class="glass-card weekly-card">
+          <div class="card-heading">
+            <h3>📅 Next 7 days</h3>
+            <p>Daily min / max and rain probability</p>
+          </div>
+          <div id="weeklyForecast" class="weekly-grid"></div>
+        </section>
+
+        <section class="glass-card map-card">
+          <div class="card-heading">
+            <h3>🌎 Weather map</h3>
+            <p>Rain overlay around your selected city</p>
+          </div>
+          <iframe
+            id="weatherMap"
+            title="Weather map"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </section>
+      </main>
+    </div>
+
+    <script src="./main.js"></script>
+  </body>
+</html>
