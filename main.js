@@ -246,7 +246,7 @@ async function searchCity(query) {
   setStatus(`Searching for ${cleanQuery}...`);
 
   try {
-    const data = await fetchJSON(`/api/search/?q=${encodeURIComponent(cleanQuery)}`);
+    const data = await requestCitySearch(cleanQuery);
 
     const results = (data.results || []).map(normalizePlace);
 
@@ -264,7 +264,7 @@ async function searchCity(query) {
 
 async function fetchSuggestions(query) {
   try {
-    const data = await fetchJSON(`/api/search/?q=${encodeURIComponent(query)}`);
+    const data = await requestCitySearch(query);
 
     const results = (data.results || []).map(normalizePlace);
     renderSuggestionDropdown(results);
@@ -351,7 +351,7 @@ async function usePlace(place) {
 
 async function reverseGeocode(latitude, longitude) {
   try {
-    const data = await fetchJSON(`/api/reverse/?latitude=${latitude}&longitude=${longitude}`);
+    const data = await requestReverseGeocode(latitude, longitude);
 
     return data.results?.[0] || {};
   } catch {
@@ -368,12 +368,7 @@ async function fetchWeatherForPlace(place) {
   setStatus(`Loading weather for ${state.currentPlace.label}...`);
 
   try {
-    const params = new URLSearchParams({
-      latitude: String(latitude),
-      longitude: String(longitude),
-    });
-
-    const data = await fetchJSON(`/api/weather/?${params.toString()}`);
+    const data = await requestWeatherForecast(latitude, longitude);
 
     state.timezone = data.timezone || state.timezone;
     state.lastWeatherData = data;
@@ -960,6 +955,56 @@ function normalizePlace(place) {
   return normalized;
 }
 
+async function requestCitySearch(query) {
+  const params = new URLSearchParams({
+    name: query,
+    count: "8",
+    language: "en",
+    format: "json",
+  });
+
+  try {
+    return await fetchJSON(`/api/search/?q=${encodeURIComponent(query)}`);
+  } catch {
+    return await fetchJSON(`https://geocoding-api.open-meteo.com/v1/search?${params.toString()}`);
+  }
+}
+
+async function requestReverseGeocode(latitude, longitude) {
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    language: "en",
+    format: "json",
+  });
+
+  try {
+    return await fetchJSON(`/api/reverse/?${params.toString()}`);
+  } catch {
+    return await fetchJSON(`https://geocoding-api.open-meteo.com/v1/reverse?${params.toString()}`);
+  }
+}
+
+async function requestWeatherForecast(latitude, longitude) {
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    current: "temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day",
+    hourly: "temperature_2m,relative_humidity_2m,weather_code,precipitation_probability,uv_index",
+    daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+    timezone: "auto",
+    forecast_days: "7",
+    temperature_unit: "celsius",
+    wind_speed_unit: "kmh",
+  });
+
+  try {
+    return await fetchJSON(`/api/weather/?${params.toString()}`);
+  } catch {
+    return await fetchJSON(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+  }
+}
+
 function buildApiOrigins() {
   const origins = [];
 
@@ -1020,11 +1065,11 @@ function setStatus(message, isError = false) {
 async function fetchJSON(urlOrPath) {
   const targets = /^https?:\/\//i.test(urlOrPath)
     ? [urlOrPath]
-    : API_ORIGINS.map((origin) => `${origin}${urlOrPath}`);
+    : [urlOrPath, ...API_ORIGINS.map((origin) => `${origin}${urlOrPath}`)];
 
   let lastError = new Error("Could not reach the weather service.");
 
-  for (const target of targets) {
+  for (const target of [...new Set(targets)]) {
     try {
       const response = await fetch(target, {
         method: "GET",
@@ -1040,6 +1085,10 @@ async function fetchJSON(urlOrPath) {
     } catch (error) {
       lastError = error;
     }
+  }
+
+  if (lastError?.name === "TypeError") {
+    throw new Error("Unable to reach the weather service. Please check your connection and try again.");
   }
 
   throw lastError;
