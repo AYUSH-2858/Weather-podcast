@@ -7,7 +7,7 @@ from django.shortcuts import render
 
 
 def home(request):
-    return render(request, "dashboard/index.html")
+    return render(request, "index.html")
 
 
 def cors_json(data, status=200):
